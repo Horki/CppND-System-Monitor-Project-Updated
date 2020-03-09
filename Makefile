@@ -9,6 +9,7 @@ format:
 build:
 	mkdir -p build
 	cd build && \
+	conan install .. --build missing && \
 	cmake .. && \
 	make
 
@@ -16,6 +17,7 @@ build:
 debug:
 	mkdir -p build
 	cd build && \
+		conan install .. --build missing && \
 	cmake -DCMAKE_BUILD_TYPE=debug .. && \
 	make
 
