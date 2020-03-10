@@ -10,9 +10,6 @@
 #include "format.h"
 #include "system.h"
 
-using std::string;
-using std::to_string;
-
 // 50 bars uniformly displayed from 0 - 100 %
 // 2% is one bar(|)
 std::string NCursesDisplay::ProgressBar(float percent) {
@@ -24,9 +21,9 @@ std::string NCursesDisplay::ProgressBar(float percent) {
     result += i <= bars ? '|' : ' ';
   }
 
-  string display{to_string(percent * 100).substr(0, 4)};
+  std::string display{std::to_string(percent * 100).substr(0, 4)};
   if (percent < 0.1 || percent == 1.0)
-    display = " " + to_string(percent * 100).substr(0, 3);
+    display = " " + std::to_string(percent * 100).substr(0, 3);
   return result + " " + display + "/100%";
 }
 
@@ -44,11 +41,12 @@ void NCursesDisplay::DisplaySystem(System& system, WINDOW* window) {
   mvwprintw(window, row, 10, "");
   wprintw(window, ProgressBar(system.MemoryUtilization()).c_str());
   wattroff(window, COLOR_PAIR(1));
-  mvwprintw(window, ++row, 2,
-            ("Total Processes: " + to_string(system.TotalProcesses())).c_str());
   mvwprintw(
       window, ++row, 2,
-      ("Running Processes: " + to_string(system.RunningProcesses())).c_str());
+      ("Total Processes: " + std::to_string(system.TotalProcesses())).c_str());
+  mvwprintw(window, ++row, 2,
+            ("Running Processes: " + std::to_string(system.RunningProcesses()))
+                .c_str());
   mvwprintw(window, ++row, 2,
             ("Up Time: " + Format::ElapsedTime(system.UpTime())).c_str());
   wrefresh(window);
@@ -72,10 +70,12 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   mvwprintw(window, row, command_column, "COMMAND");
   wattroff(window, COLOR_PAIR(2));
   for (int i = 0; i < n; ++i) {
-    mvwprintw(window, ++row, pid_column, to_string(processes[i].Pid()).c_str());
+    mvwprintw(window, ++row, pid_column,
+              std::to_string(processes[i].Pid()).c_str());
     mvwprintw(window, row, user_column, processes[i].User().c_str());
     float cpu = processes[i].CpuUtilization() * 100;
-    mvwprintw(window, row, cpu_column, to_string(cpu).substr(0, 4).c_str());
+    mvwprintw(window, row, cpu_column,
+              std::to_string(cpu).substr(0, 4).c_str());
     mvwprintw(window, row, ram_column, processes[i].Ram().c_str());
     mvwprintw(window, row, time_column,
               Format::ElapsedTime(processes[i].UpTime()).c_str());
@@ -95,7 +95,7 @@ void NCursesDisplay::Display(System& system, int n) {
   WINDOW* process_window =
       newwin(3 + n, x_max - 1, system_window->_maxy + 1, 0);
 
-  while (1) {
+  while (true) {
     init_pair(1, COLOR_BLUE, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
     box(system_window, 0, 0);
