@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -44,23 +45,18 @@ std::string LinuxParser::Kernel() {
   return kernel;
 }
 
-// BONUS: Update this to use std::filesystem
+// DONE: Update this to use std::filesystem
+// ls /proc/ | grep '[0-9]' | sort -V
 std::vector<int> LinuxParser::Pids() {
   std::vector<int> pids;
-  DIR* directory = opendir(kProcDirectory.c_str());
-  struct dirent* file;
-  while ((file = readdir(directory)) != nullptr) {
-    // Is this a directory?
-    if (file->d_type == DT_DIR) {
-      // Is every character of the name a digit?
-      std::string filename(file->d_name);
-      if (std::all_of(filename.begin(), filename.end(), isdigit)) {
-        int pid = std::stoi(filename);
-        pids.push_back(pid);
-      }
+  std::size_t len = kProcDirectory.length();
+  for (const auto& dir : std::filesystem::directory_iterator(kProcDirectory)) {
+    std::string proc_path = dir.path();
+    std::string proc_id = proc_path.substr(len);
+    if (std::all_of(proc_id.begin(), proc_id.end(), isdigit)) {
+      pids.push_back(std::stoi(proc_id));
     }
   }
-  closedir(directory);
   return pids;
 }
 
